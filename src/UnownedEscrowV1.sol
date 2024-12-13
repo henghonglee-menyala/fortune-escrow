@@ -1,11 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.0 <0.9.0;
-import "lib/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "lib/v3-periphery/contracts/libraries/TransferHelper.sol";
-
-
-import "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
-import "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract UnownedEscrowV1 {
     using SafeERC20 for IERC20;
