@@ -1,0 +1,10 @@
+{
+  "name": "fortune-escrow-unowned",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-foundry": "^1.0.1",
+    "hardhat": "^2.15.0"
+  }
+}
