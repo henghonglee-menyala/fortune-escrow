@@ -14,8 +14,6 @@ contract UnownedEscrowV1 {
     IERC20 public srcToken;
     IERC20 public destToken;
     ISwapRouter public immutable swapRouter;
-    // For this example, we will set the pool fee to 0.3%.
-    uint24 public constant poolFee = 3000;
 
     event SrcTokenDeposited();
     event DestTokenWithdrawn(uint256 amountOut);
@@ -42,12 +40,12 @@ contract UnownedEscrowV1 {
         uint256 actualOut = swapRouter.exactInputSingle(ISwapRouter.ExactInputSingleParams({
                 tokenIn: address(srcToken),
                 tokenOut: address(destToken),
-                fee: poolFee,
-                recipient: dest,
+                fee: 0,
+                recipient: address(this),
                 deadline: block.timestamp,
                 amountIn: amountIn,
                 amountOutMinimum: amountOut,
-                sqrtPriceLimitX96: 0
+                sqrtPriceLimitX96: 0 // setting amountOutMinimum removes the need for this
             }));
         // actual out might be MORE than amountOut
         emit DestTokenWithdrawn(actualOut);
@@ -61,8 +59,8 @@ contract UnownedEscrowV1 {
         uint256 actualOut = swapRouter.exactOutputSingle(ISwapRouter.ExactOutputSingleParams({
                 tokenIn: address(srcToken),
                 tokenOut: address(destToken),
-                fee: poolFee,
-                recipient: dest,
+                fee: 0,
+                recipient: address(this),
                 deadline: block.timestamp,
                 amountOut: amountOut,
                 amountInMaximum: amountIn,
@@ -72,11 +70,19 @@ contract UnownedEscrowV1 {
         emit DestTokenWithdrawn(actualOut);
         return actualOut;
     }
-    
+
+    function withdraw(uint256 amount) public returns (bool) {
+        destToken.safeTransfer(dest, amount);
+        return true;
+    }
 
     function refund() public returns (bool) {
-        uint256 balance = srcToken.balanceOf(address(this));
-        srcToken.safeTransfer(src, balance);
+        uint256 srcTokenBalance = srcToken.balanceOf(address(this));
+        srcToken.safeTransfer(src, srcTokenBalance);
+
+        uint256 destTokenBalance = destToken.balanceOf(address(this));
+        destToken.safeTransfer(dest, destTokenBalance);
+
         emit Refunded();
         return true;
     }
