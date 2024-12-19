@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.0 <0.9.0;
-import "@uniswap/v3-periphery/contracts/interfaces/ISwapRouter.sol";
-import "@uniswap/v3-periphery/contracts/libraries/TransferHelper.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "lib/v3-periphery/contracts/interfaces/ISwapRouter.sol";
+import "lib/v3-periphery/contracts/libraries/TransferHelper.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import "lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol";
 
 contract UnownedEscrowV1 {
     using SafeERC20 for IERC20;
@@ -32,32 +32,28 @@ contract UnownedEscrowV1 {
     }
 
     // this assumes the srcToken has already been deposited
-    function fixedSrcSwapAndSend(uint256 amountIn, uint256 amountOut) public returns (uint256) {
-        emit SrcTokenDeposited();
+    function fixedSrcSwap(uint256 amountIn, uint256 amountOut) public returns (uint256) {
         TransferHelper.safeApprove(address(srcToken), address(swapRouter), amountIn);
         uint256 actualOut = swapRouter.exactInputSingle(ISwapRouter.ExactInputSingleParams({
                 tokenIn: address(srcToken),
                 tokenOut: address(destToken),
-                fee: 0,
+                fee: 500, // Standard 0.05% fee tier
                 recipient: address(this),
                 deadline: block.timestamp,
                 amountIn: amountIn,
                 amountOutMinimum: amountOut,
-                sqrtPriceLimitX96: 0 // setting amountOutMinimum removes the need for this
+                sqrtPriceLimitX96: 0
             }));
-        // actual out might be MORE than amountOut
-        emit DestTokenWithdrawn(actualOut);
         return actualOut;
     }
 
     // this assumes the srcToken has already been deposited
-    function fixedDestSwapAndSend(uint256 amountIn, uint256 amountOut) public returns (uint256) {
-        emit SrcTokenDeposited();
+    function fixedDestSwap(uint256 amountIn, uint256 amountOut) public returns (uint256) {
         TransferHelper.safeApprove(address(srcToken), address(swapRouter), amountIn);
         uint256 actualOut = swapRouter.exactOutputSingle(ISwapRouter.ExactOutputSingleParams({
                 tokenIn: address(srcToken),
                 tokenOut: address(destToken),
-                fee: 0,
+                fee: 500,
                 recipient: address(this),
                 deadline: block.timestamp,
                 amountOut: amountOut,
@@ -65,7 +61,6 @@ contract UnownedEscrowV1 {
                 sqrtPriceLimitX96: 0
             }));
         // actual out might be MORE than amountOut
-        emit DestTokenWithdrawn(actualOut);
         return actualOut;
     }
 
